@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🪶 Ibis Dashboard</title>
+    <title>Strava Stats</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -650,7 +650,7 @@
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-content">
-            <div class="nav-logo">🪶 Ibis Dashboard</div>
+            <div class="nav-logo">Strava Stats</div>
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchView('dashboard')">Dashboard</button>
                 <button class="nav-tab" onclick="switchView('config')">Configure</button>
@@ -776,7 +776,7 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-content">
-            <div class="loading-title">🪶 Please Wait 🪶</div>
+            <div class="loading-title">Please Wait</div>
             <div class="feather-animation" id="featherAnim">🪶</div>
             <div class="loading-message" id="loadingMessage">Loading...</div>
         </div>
@@ -877,7 +877,7 @@
             config.trackPeriod = parseInt(document.getElementById('trackPeriod').value) || 0;
             config.refreshInterval = document.getElementById('refreshInterval').value;
 
-            localStorage.setItem('ibisConfig', JSON.stringify(config));
+            localStorage.setItem('stravaStatsConfig', JSON.stringify(config));
             
             showModal('Configuration Saved', 'Your settings have been saved successfully!', 'success');
             updateDashboard();
@@ -887,7 +887,7 @@
         }
 
         function loadConfig() {
-            const saved = localStorage.getItem('ibisConfig');
+            const saved = localStorage.getItem('stravaStatsConfig');
             if (saved) {
                 config = { ...config, ...JSON.parse(saved) };
             }
@@ -963,7 +963,7 @@
                     config.accessToken = data.access_token;
                     config.tokenExpiry = Date.now() + (data.expires_in * 1000);
                     
-                    localStorage.setItem('ibisConfig', JSON.stringify(config));
+                    localStorage.setItem('stravaStatsConfig', JSON.stringify(config));
                     
                     hideLoading();
                     document.getElementById('stravaStatus').innerHTML = 
@@ -1011,7 +1011,7 @@
                     config.accessToken = data.access_token;
                     config.refreshToken = data.refresh_token;
                     config.tokenExpiry = Date.now() + (data.expires_in * 1000);
-                    localStorage.setItem('ibisConfig', JSON.stringify(config));
+                    localStorage.setItem('stravaStatsConfig', JSON.stringify(config));
                     return config.accessToken;
                 }
             } catch (error) {
@@ -1055,7 +1055,7 @@
                 };
 
                 // Save to localStorage for offline viewing
-                localStorage.setItem('ibisStravaData', JSON.stringify(stravaData));
+                localStorage.setItem('stravaStatsData', JSON.stringify(stravaData));
 
                 hideLoading();
                 updateDashboard();
@@ -1076,7 +1076,7 @@
                 `${periodName} ${config.sport} Progress`;
 
             // Try to load cached data
-            const cached = localStorage.getItem('ibisStravaData');
+            const cached = localStorage.getItem('stravaStatsData');
             if (cached) {
                 stravaData = JSON.parse(cached);
             }

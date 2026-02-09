@@ -12,7 +12,7 @@ const server = http.createServer((req, res) => {
 
     // Serve the main HTML file with HOST and PORT injected
     if (pathname === '/' || pathname === '/index.html') {
-        fs.readFile(path.join(__dirname, 'ibis-dashboard.html'), 'utf8', (err, data) => {
+        fs.readFile(path.join(__dirname, 'strava-stats.html'), 'utf8', (err, data) => {
             if (err) {
                 res.writeHead(500);
                 res.end('Error loading page');
@@ -119,7 +119,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`🪶 Ibis Dashboard Server running at http://${HOST}:${PORT}`);
+    console.log(`Strava Stats server running at http://${HOST}:${PORT}`);
     console.log(`Open your browser and navigate to http://${HOST}:${PORT}`);
     console.log(`\nEnvironment variables:`);
     console.log(`  HOST: ${HOST} (can be set with HOST=your-domain)`);

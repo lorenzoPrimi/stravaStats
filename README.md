@@ -1,6 +1,6 @@
-# 🪶 Ibis Dashboard - Complete Web App
+# Strava Stats
 
-A modern, full-featured web dashboard for viewing your Strava stats. This replaces the Python Tkinter desktop app AND provides a beautiful live dashboard to track your progress.
+A modern, full-featured web dashboard for viewing your Strava stats with a beautiful live dashboard to track your progress.
 
 ## Features
 
@@ -47,7 +47,7 @@ Before using the app, you need to create a Strava API application:
 1. Go to [strava.com/settings/api](https://www.strava.com/settings/api)
 2. Click "Create an App" or "My API Application"
 3. Fill in the form:
-   - **Application Name**: Ibis Dash
+   - **Application Name**: Strava Stats
    - **Category**: Choose any
    - **Club**: Leave blank (or choose if you have one)
    - **Website**: http://localhost:8089
@@ -59,7 +59,7 @@ Before using the app, you need to create a Strava API application:
 
 ```bash
 # Navigate to the directory containing the files
-cd path/to/ibis-dashboard
+cd path/to/strava-stats
 
 # Start the server (default: localhost:8089)
 node server.js
@@ -174,7 +174,7 @@ export PORT=8089
 node server.js
 
 # Or with PM2
-pm2 start server.js --name ibis-dashboard
+pm2 start server.js --name strava-stats
 ```
 
 #### Option 2: Using a Process Manager
@@ -183,7 +183,7 @@ pm2 start server.js --name ibis-dashboard
 npm install -g pm2
 
 # Start with environment variables
-HOST=yourdomain.com PORT=8089 pm2 start server.js --name ibis-dashboard
+HOST=yourdomain.com PORT=8089 pm2 start server.js --name strava-stats
 
 # Save PM2 configuration
 pm2 save
@@ -248,7 +248,7 @@ If stats don't appear after authorization:
 ## Development
 
 The app consists of two files:
-- `ibis-dashboard-complete.html` - Single-page application with dashboard and configuration
+- `strava-stats.html` - Single-page application with dashboard and configuration
 - `server.js` - Minimal Node.js server for OAuth callback handling
 
 ### Tech Stack
@@ -269,13 +269,13 @@ The app consists of two files:
 ```javascript
 {
   // Configuration
-  ibisConfig: {
+  stravaStatsConfig: {
     clientID, clientSecret, refreshToken, accessToken,
     tokenExpiry, name, sport, goal, trackPeriod, refreshInterval
   },
   
   // Cached Stats
-  ibisStravaData: {
+  stravaStatsData: {
     athlete: { id, firstname, city, ... },
     stats: { ytd_run_totals, recent_run_totals, ... },
     fetchedAt: timestamp
@@ -293,15 +293,15 @@ This web app features a distinctive design that avoids generic UI patterns:
 
 ## License
 
-Same license as the original Ibis Dashboard project.
+ISC
 
 ## Credits
 
-Converted from the original Python Tkinter application by [@ibisette](https://github.com/ibisette)
+Originally converted from a Python Tkinter application by [@ibisette](https://github.com/ibisette)
 
 ## Support
 
 For issues related to:
 - **This web app**: Open an issue in this repository
-- **Ibis Dashboard hardware**: See the [original repository](https://github.com/ibisette/Ibis_Dash_Esp32s3_PhotoPainter)
+- **Original Ibis Dashboard hardware**: See the [original repository](https://github.com/ibisette/Ibis_Dash_Esp32s3_PhotoPainter)
 - **Strava API**: Check [Strava's API documentation](https://developers.strava.com/)

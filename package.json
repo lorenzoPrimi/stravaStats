@@ -1,7 +1,7 @@
 {
-  "name": "ibis-dashboard-webapp",
+  "name": "strava-stats",
   "version": "1.0.0",
-  "description": "Web-based configuration tool for Ibis Strava Dashboard",
+  "description": "Web-based dashboard for viewing Strava statistics",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,11 +10,10 @@
   "keywords": [
     "strava",
     "dashboard",
-    "ibis",
-    "esp32",
-    "e-ink"
+    "stats",
+    "athletics"
   ],
-  "author": "Converted from Tkinter app by ibisette",
+  "author": "",
   "license": "ISC",
   "engines": {
     "node": ">=14.0.0"
