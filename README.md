@@ -4,13 +4,17 @@ A modern, full-featured web dashboard for viewing your Strava stats with a beaut
 
 ## Features
 
-✨ **Live Dashboard** - Real-time display of your Strava stats with beautiful visualizations
-📊 **Progress Tracking** - Track your distance goals with visual progress bars
-📡 **Strava Integration** - Full OAuth flow for secure Strava connection
-👤 **Personalization** - Customize goals, sport type, and tracking periods
-🔄 **Auto-Refresh** - Automatically updates your stats at configurable intervals
-💾 **Offline Support** - Cached stats available even when offline
-🎨 **Distinctive Design** - Custom typography, smooth animations, and vibrant color scheme
+- **Live Dashboard** - Real-time display of your Strava stats with beautiful visualizations
+- **Progress Tracking** - Track your distance goals with visual progress bars
+- **Strava Integration** - Full OAuth flow for secure Strava connection
+- **Personalization** - Customize goals, sport type, and tracking periods
+- **Auto-Refresh** - Automatically updates your stats at configurable intervals
+- **Offline Support** - Cached stats available even when offline
+- **Distinctive Design** - Custom typography, smooth animations, and vibrant color scheme
+
+## Screenshot
+
+<img src="stravaStats.jpg" alt="Strava Stats Dashboard" width="600">
 
 ## What's Changed from the Original
 
