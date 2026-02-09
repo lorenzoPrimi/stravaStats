@@ -3,22 +3,28 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
-const PORT = 8089;
+const HOST = process.env.HOST || 'localhost';
+const PORT = process.env.PORT || 8089;
 
 const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const pathname = parsedUrl.pathname;
 
-    // Serve the main HTML file
+    // Serve the main HTML file with HOST and PORT injected
     if (pathname === '/' || pathname === '/index.html') {
-        fs.readFile(path.join(__dirname, 'ibis-dashboard.html'), (err, data) => {
+        fs.readFile(path.join(__dirname, 'ibis-dashboard.html'), 'utf8', (err, data) => {
             if (err) {
                 res.writeHead(500);
                 res.end('Error loading page');
                 return;
             }
+            // Inject HOST and PORT into the HTML
+            const injectedHtml = data
+                .replace(/const OAUTH_REDIRECT_PORT = 8089;/g, `const OAUTH_REDIRECT_PORT = ${PORT};`)
+                .replace(/localhost:\${OAUTH_REDIRECT_PORT}/g, `${HOST}:\${OAUTH_REDIRECT_PORT}`);
+            
             res.writeHead(200, { 'Content-Type': 'text/html' });
-            res.end(data);
+            res.end(injectedHtml);
         });
     }
     // Handle OAuth callback
@@ -113,6 +119,9 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`🪶 Ibis Dashboard Server running at http://localhost:${PORT}`);
-    console.log(`Open your browser and navigate to http://localhost:${PORT}`);
+    console.log(`🪶 Ibis Dashboard Server running at http://${HOST}:${PORT}`);
+    console.log(`Open your browser and navigate to http://${HOST}:${PORT}`);
+    console.log(`\nEnvironment variables:`);
+    console.log(`  HOST: ${HOST} (can be set with HOST=your-domain)`);
+    console.log(`  PORT: ${PORT} (can be set with PORT=8080)`);
 });

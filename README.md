@@ -61,11 +61,23 @@ Before using the app, you need to create a Strava API application:
 # Navigate to the directory containing the files
 cd path/to/ibis-dashboard
 
-# Start the server
+# Start the server (default: localhost:8089)
 node server.js
+
+# OR specify custom host and port
+HOST=yourdomain.com PORT=3000 node server.js
 ```
 
-The server will start on `http://localhost:8089`
+The server supports these environment variables:
+- **HOST**: The hostname/domain (default: `localhost`)
+- **PORT**: The port number (default: `8089`)
+
+The server will automatically inject the correct HOST and PORT values into the HTML file, so the OAuth callback redirects to the right location.
+
+**Important for Production:**
+If deploying to a public domain, make sure to:
+1. Set `HOST` to your domain (e.g., `HOST=myapp.example.com`)
+2. Update your Strava API application's "Authorization Callback Domain" to match your domain
 
 ### 3. Open in Browser
 
@@ -142,25 +154,96 @@ This app requests the following Strava API permissions:
 - **read**: Read public profile data
 - **activity:read_all**: Read all activity data (public and private)
 
+## Deployment
+
+### Local Development
+```bash
+node server.js
+# Access at http://localhost:8089
+```
+
+### Production Deployment
+
+#### Option 1: VPS/Server
+```bash
+# Set environment variables
+export HOST=yourdomain.com
+export PORT=8089
+
+# Start the server (consider using PM2 or similar)
+node server.js
+
+# Or with PM2
+pm2 start server.js --name ibis-dashboard
+```
+
+#### Option 2: Using a Process Manager
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start with environment variables
+HOST=yourdomain.com PORT=8089 pm2 start server.js --name ibis-dashboard
+
+# Save PM2 configuration
+pm2 save
+pm2 startup
+```
+
+**Don't forget to:**
+1. Update Strava API "Authorization Callback Domain" to your domain
+2. Set up SSL/HTTPS if deploying publicly (Strava requires HTTPS for production)
+3. Configure your firewall to allow traffic on your chosen port
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HOST` | `localhost` | Hostname or domain where the app is running |
+| `PORT` | `8089` | Port number for the HTTP server |
+
+Example:
+```bash
+HOST=dashboard.example.com PORT=3000 node server.js
+```
+
 ## Troubleshooting
 
 ### OAuth Popup Blocked
 If the Strava authorization popup is blocked by your browser:
 1. Check your browser's popup blocker settings
-2. Allow popups for `localhost:8089`
+2. Allow popups for your domain (e.g., `localhost:8089`)
 3. Try clicking the button again
 
 ### Authorization Failed
 If you see "Authorization failed":
 1. Verify your Client ID and Client Secret are correct
-2. Make sure the Authorization Callback Domain in Strava is set to `localhost`
+2. Make sure the Authorization Callback Domain in Strava matches your HOST
+   - For local: use `localhost`
+   - For production: use your domain without protocol (e.g., `myapp.com` not `https://myapp.com`)
 3. Try creating a new API application on Strava
 
 ### Port Already in Use
-If port 8089 is already in use:
-1. Edit `server.js` and change `PORT` to a different value (e.g., 8090)
-2. Also update the port in `ibis-dashboard.html` where `OAUTH_REDIRECT_PORT` is defined
-3. Update your Strava API application's callback domain if needed
+If port is already in use:
+```bash
+# Use a different port
+PORT=3000 node server.js
+```
+
+### Wrong Redirect URI
+If you get a redirect URI mismatch error:
+1. Check your Strava API application's callback domain
+2. Ensure it matches your HOST setting
+3. The callback domain should be just the hostname (no protocol, no path)
+   - ✅ Correct: `localhost` or `myapp.com`
+   - ❌ Wrong: `http://localhost` or `myapp.com/callback`
+
+### Stats Not Loading
+If stats don't appear after authorization:
+1. Open browser developer console (F12) to check for errors
+2. Verify your access token is valid (check localStorage)
+3. Try clicking the refresh button
+4. Clear browser cache and re-authorize
 
 ## Development
 
