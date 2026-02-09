@@ -1,0 +1,224 @@
+# 🪶 Ibis Dashboard - Complete Web App
+
+A modern, full-featured web dashboard for viewing your Strava stats. This replaces the Python Tkinter desktop app AND provides a beautiful live dashboard to track your progress.
+
+## Features
+
+✨ **Live Dashboard** - Real-time display of your Strava stats with beautiful visualizations
+📊 **Progress Tracking** - Track your distance goals with visual progress bars
+📡 **Strava Integration** - Full OAuth flow for secure Strava connection
+👤 **Personalization** - Customize goals, sport type, and tracking periods
+🔄 **Auto-Refresh** - Automatically updates your stats at configurable intervals
+💾 **Offline Support** - Cached stats available even when offline
+🎨 **Distinctive Design** - Custom typography, smooth animations, and vibrant color scheme
+
+## What's Changed from the Original
+
+### ✅ Kept & Enhanced
+- Strava API OAuth flow
+- Configuration management (name, sport, goal, tracking period, refresh interval)
+- Battery life estimates (for hardware reference)
+- Funny loading messages
+- Step-by-step wizard interface
+- **NEW:** Live dashboard with real stats
+- **NEW:** Progress visualization with charts
+- **NEW:** Auto-refresh functionality
+- **NEW:** Offline caching of stats
+
+### ❌ Removed (Hardware-Specific)
+- Serial/USB connection
+- WiFi configuration
+- Direct board communication
+- E-ink display rendering
+- Hardware power management
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- A modern web browser
+- Strava account and API credentials
+
+## Getting Started
+
+### 1. Get Strava API Credentials
+
+Before using the app, you need to create a Strava API application:
+
+1. Go to [strava.com/settings/api](https://www.strava.com/settings/api)
+2. Click "Create an App" or "My API Application"
+3. Fill in the form:
+   - **Application Name**: Ibis Dash
+   - **Category**: Choose any
+   - **Club**: Leave blank (or choose if you have one)
+   - **Website**: http://localhost:8089
+   - **Authorization Callback Domain**: `localhost` (important: just "localhost", not a full URL)
+4. Click "Create"
+5. You'll receive a **Client ID** and **Client Secret** - save these!
+
+### 2. Run the Server
+
+```bash
+# Navigate to the directory containing the files
+cd path/to/ibis-dashboard
+
+# Start the server
+node server.js
+```
+
+The server will start on `http://localhost:8089`
+
+### 3. Open in Browser
+
+Open your browser and navigate to:
+```
+http://localhost:8089
+```
+
+## Usage Guide
+
+The app has two main views accessible via the top navigation:
+
+### Dashboard View
+
+Your live Strava statistics dashboard showing:
+- **Progress Bar**: Visual representation of your goal progress
+- **Distance**: Total kilometers traveled
+- **Moving Time**: Active time spent on activities
+- **Elevation Gain**: Total meters climbed
+- **Activities**: Number of completed activities
+- **Average Distance**: Average per activity
+- **Athlete Info**: Your name and location
+
+**Features:**
+- 🔄 Click the refresh button (bottom-right) to update stats manually
+- 📊 Stats update automatically based on your refresh interval setting
+- 💾 Data is cached, so you can view your last stats even offline
+
+### Configure View
+
+Setup your Strava connection and preferences:
+
+#### Step 1: Connect Strava
+
+1. Enter your Strava **Client ID** and **Client Secret**
+2. Click **"🔑 Authorize Strava"**
+3. A popup will open asking you to authorize the app on Strava
+4. Click "Authorize" on the Strava page
+5. The popup will close automatically and you'll see a success message
+6. Your stats will automatically load in the Dashboard
+
+#### Step 2: Personalize
+
+Configure your dashboard preferences:
+- **Your Name**: Displayed on the dashboard (optional)
+- **Sport Type**: Run, Ride, Swim, Hike, or Walk
+- **Distance Goal**: Target distance in kilometers
+- **Tracking Period**: 
+  - Yearly: Jan 1 - Dec 31
+  - Monthly: Last ~30 days
+  - Weekly: Last ~7 days
+- **Auto Refresh Interval**: How often to fetch new data
+  - Every hour
+  - Every 6 hours
+  - Every 12 hours
+  - Once a day (recommended)
+  - Manual only
+
+#### Step 3: Save & View
+
+Click **"💾 Save Configuration"** and switch to the Dashboard tab to see your stats!
+
+## How It Works
+
+1. **OAuth Authentication**: Securely connects to Strava using OAuth 2.0
+2. **Data Fetching**: Retrieves your athlete stats via Strava API v3
+3. **Local Caching**: Stores data in browser localStorage for offline viewing
+4. **Auto-Refresh**: Optionally fetches new data at your configured interval
+5. **Token Management**: Automatically refreshes access tokens as needed
+
+## Strava API Scopes
+
+This app requests the following Strava API permissions:
+- **read**: Read public profile data
+- **activity:read_all**: Read all activity data (public and private)
+
+## Troubleshooting
+
+### OAuth Popup Blocked
+If the Strava authorization popup is blocked by your browser:
+1. Check your browser's popup blocker settings
+2. Allow popups for `localhost:8089`
+3. Try clicking the button again
+
+### Authorization Failed
+If you see "Authorization failed":
+1. Verify your Client ID and Client Secret are correct
+2. Make sure the Authorization Callback Domain in Strava is set to `localhost`
+3. Try creating a new API application on Strava
+
+### Port Already in Use
+If port 8089 is already in use:
+1. Edit `server.js` and change `PORT` to a different value (e.g., 8090)
+2. Also update the port in `ibis-dashboard.html` where `OAUTH_REDIRECT_PORT` is defined
+3. Update your Strava API application's callback domain if needed
+
+## Development
+
+The app consists of two files:
+- `ibis-dashboard-complete.html` - Single-page application with dashboard and configuration
+- `server.js` - Minimal Node.js server for OAuth callback handling
+
+### Tech Stack
+- **Frontend**: Vanilla JavaScript (no frameworks needed!)
+- **Styling**: Custom CSS with animations and gradients
+- **Typography**: DM Serif Display + IBM Plex Mono (Google Fonts)
+- **API**: Strava API v3
+- **Storage**: Browser localStorage for configuration and caching
+- **Backend**: Node.js HTTP server (only for OAuth redirect)
+
+### API Endpoints Used
+- `/oauth/authorize` - Strava OAuth authorization
+- `/oauth/token` - Get/refresh access tokens  
+- `/api/v3/athlete` - Get athlete profile
+- `/api/v3/athletes/:id/stats` - Get athlete statistics
+
+### Local Storage Schema
+```javascript
+{
+  // Configuration
+  ibisConfig: {
+    clientID, clientSecret, refreshToken, accessToken,
+    tokenExpiry, name, sport, goal, trackPeriod, refreshInterval
+  },
+  
+  // Cached Stats
+  ibisStravaData: {
+    athlete: { id, firstname, city, ... },
+    stats: { ytd_run_totals, recent_run_totals, ... },
+    fetchedAt: timestamp
+  }
+}
+```
+
+## Design Philosophy
+
+This web app features a distinctive design that avoids generic UI patterns:
+- **Typography**: Editorial serif headings paired with monospace body text
+- **Color Palette**: Dark theme with vibrant accent colors (coral red, turquoise, warm yellow)
+- **Animations**: Smooth transitions and playful loading states
+- **Layout**: Card-based wizard with clear visual hierarchy
+
+## License
+
+Same license as the original Ibis Dashboard project.
+
+## Credits
+
+Converted from the original Python Tkinter application by [@ibisette](https://github.com/ibisette)
+
+## Support
+
+For issues related to:
+- **This web app**: Open an issue in this repository
+- **Ibis Dashboard hardware**: See the [original repository](https://github.com/ibisette/Ibis_Dash_Esp32s3_PhotoPainter)
+- **Strava API**: Check [Strava's API documentation](https://developers.strava.com/)

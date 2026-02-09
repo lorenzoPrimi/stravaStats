@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🪶 Ibis Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #0f1729;
+            --bg-card: #162035;
+            --accent-primary: #ff6b6b;
+            --accent-secondary: #4ecdc4;
+            --accent-tertiary: #ffe66d;
+            --text-primary: #f0f4f8;
+            --text-secondary: #b0c4de;
+            --text-dim: #6b7a92;
+            --success: #4ecdc4;
+            --warning: #ffe66d;
+            --danger: #ff6b6b;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(78, 205, 196, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 41, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-tab {
+            padding: 8px 20px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-tab:hover {
+            background: var(--bg-card);
+            border-color: var(--accent-primary);
+        }
+
+        .nav-tab.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        /* Main Content */
+        .main {
+            padding-top: 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Dashboard View */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .dashboard-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 3rem;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.6s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+            margin-bottom: 4px;
+        }
+
+        .stat-unit {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-secondary {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* Progress Bar */
+        .progress-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+        }
+
+        .progress-percentage {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+        }
+
+        .progress-bar-container {
+            height: 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 12px;
+            transition: width 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                left: 100%;
+            }
+        }
+
+        .progress-details {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Config View */
+        .config {
+            display: none;
+        }
+
+        .config.active {
+            display: block;
+        }
+
+        .config-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            color: var(--accent-primary);
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .form-hint {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), #ff8787);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #6ee7dc);
+            color: var(--bg-primary);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 16px;
+        }
+
+        .status-badge.success {
+            background: rgba(78, 205, 196, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-badge.error {
+            background: rgba(255, 107, 107, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Link */
+        .link {
+            color: var(--accent-secondary);
+            text-decoration: none;
+            border-bottom: 1px solid var(--accent-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .link:hover {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 18, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-primary);
+        }
+
+        .feather-animation {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .loading-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 18, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .modal-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .modal-body {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Refresh button in dashboard */
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.1) rotate(180deg);
+            box-shadow: 0 12px 32px rgba(255, 107, 107, 0.6);
+        }
+
+        .refresh-btn svg {
+            width: 28px;
+            height: 28px;
+            stroke: white;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-top: 20px;
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            color: var(--danger);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="nav-logo">🪶 Ibis Dashboard</div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchView('dashboard')">Dashboard</button>
+                <button class="nav-tab" onclick="switchView('config')">Configure</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard View -->
+            <div class="dashboard active" id="dashboardView">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title" id="dashboardName">Strava Stats</h1>
+                    <p class="dashboard-subtitle" id="dashboardPeriod">Yearly Progress</p>
+                </div>
+
+                <div id="dashboardContent">
+                    <div class="error-message">
+                        <h3>🔧 Configuration Needed</h3>
+                        <p>Please configure your Strava credentials in the Configure tab to see your stats.</p>
+                    </div>
+                </div>
+
+                <div class="last-updated" id="lastUpdated"></div>
+            </div>
+
+            <!-- Config View -->
+            <div class="config" id="configView">
+                <div class="config-section">
+                    <h2 class="section-title">Connect Strava</h2>
+                    <p class="section-subtitle">
+                        Go to <a href="https://www.strava.com/settings/api" target="_blank" class="link">strava.com/settings/api</a> 
+                        and find your API credentials.
+                    </p>
+
+                    <div class="form-group">
+                        <label class="form-label">Client ID</label>
+                        <input type="text" class="form-input" id="clientID" placeholder="Enter your Strava Client ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Client Secret</label>
+                        <input type="password" class="form-input" id="clientSecret" placeholder="Enter your Strava Client Secret">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="showSecret">
+                            <label for="showSecret">Show Secret</label>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <button class="btn btn-success" onclick="startOAuthFlow()" style="padding: 16px 40px; font-size: 1.1rem;">
+                            🔑 Authorize Strava
+                        </button>
+                        <div id="stravaStatus"></div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h2 class="section-title">Personalize Your Dashboard</h2>
+                    <p class="section-subtitle">Customize your dashboard with your preferences.</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" class="form-input" id="name" placeholder="Enter your name">
+                        <p class="form-hint">Leave blank to display 'STRAVA STATS' as the title</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Sport Type</label>
+                        <select class="form-select" id="sport">
+                            <option value="Run">Run</option>
+                            <option value="Ride">Ride</option>
+                            <option value="Swim">Swim</option>
+                            <option value="Hike">Hike</option>
+                            <option value="Walk">Walk</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Distance Goal (km)</label>
+                        <input type="number" class="form-input" id="goal" placeholder="1000" min="1" value="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tracking Period</label>
+                        <select class="form-select" id="trackPeriod">
+                            <option value="0">Yearly</option>
+                            <option value="1">Monthly</option>
+                            <option value="2">Weekly</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Auto Refresh Interval</label>
+                        <select class="form-select" id="refreshInterval">
+                            <option value="3600000">Every hour</option>
+                            <option value="21600000">Every 6 hours</option>
+                            <option value="43200000">Every 12 hours</option>
+                            <option value="86400000" selected>Once a day</option>
+                            <option value="never">Manual refresh only</option>
+                        </select>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-success" onclick="saveConfig()">💾 Save Configuration</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Refresh Button (only visible on dashboard) -->
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshStats()">
+        <svg viewBox="0 0 24 24">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+            <path d="M3 21v-5h5"/>
+        </svg>
+    </button>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-title">🪶 Please Wait 🪶</div>
+            <div class="feather-animation" id="featherAnim">🪶</div>
+            <div class="loading-message" id="loadingMessage">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">Notice</div>
+            <div class="modal-body" id="modalBody">Message goes here</div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="modalOk">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const OAUTH_REDIRECT_PORT = 8089;
+        const OAUTH_REDIRECT_URI = `http://localhost:${OAUTH_REDIRECT_PORT}/callback`;
+        const STRAVA_AUTH_URL = "https://www.strava.com/oauth/authorize";
+        const STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token";
+        const STRAVA_ATHLETE_URL = "https://www.strava.com/api/v3/athlete";
+        const STRAVA_STATS_URL = "https://www.strava.com/api/v3/athletes";
+
+        let config = {
+            clientID: '',
+            clientSecret: '',
+            refreshToken: '',
+            accessToken: '',
+            tokenExpiry: 0,
+            name: '',
+            sport: 'Run',
+            goal: 1000,
+            trackPeriod: 0,
+            refreshInterval: 86400000
+        };
+
+        let refreshIntervalId = null;
+        let stravaData = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConfig();
+            setupEventListeners();
+            updateDashboard();
+            
+            if (config.refreshToken) {
+                refreshStats();
+            }
+        });
+
+        function setupEventListeners() {
+            document.getElementById('showSecret').addEventListener('change', (e) => {
+                document.getElementById('clientSecret').type = e.target.checked ? 'text' : 'password';
+            });
+            document.getElementById('modalOk').addEventListener('click', hideModal);
+        }
+
+        function switchView(view) {
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('dashboardView').classList.remove('active');
+            document.getElementById('configView').classList.remove('active');
+            document.getElementById('refreshBtn').style.display = 'none';
+
+            if (view === 'dashboard') {
+                document.querySelector('.nav-tab').classList.add('active');
+                document.getElementById('dashboardView').classList.add('active');
+                document.getElementById('refreshBtn').style.display = config.refreshToken ? 'block' : 'none';
+            } else {
+                document.querySelectorAll('.nav-tab')[1].classList.add('active');
+                document.getElementById('configView').classList.add('active');
+                loadConfigToForm();
+            }
+        }
+
+        function loadConfigToForm() {
+            document.getElementById('clientID').value = config.clientID || '';
+            document.getElementById('clientSecret').value = config.clientSecret || '';
+            document.getElementById('name').value = config.name || '';
+            document.getElementById('sport').value = config.sport || 'Run';
+            document.getElementById('goal').value = config.goal || 1000;
+            document.getElementById('trackPeriod').value = config.trackPeriod || 0;
+            document.getElementById('refreshInterval').value = config.refreshInterval || 86400000;
+
+            if (config.refreshToken) {
+                document.getElementById('stravaStatus').innerHTML = 
+                    '<div class="status-badge success">✓ Strava Connected</div>';
+            }
+        }
+
+        function saveConfig() {
+            config.clientID = document.getElementById('clientID').value.trim();
+            config.clientSecret = document.getElementById('clientSecret').value.trim();
+            config.name = document.getElementById('name').value.trim();
+            config.sport = document.getElementById('sport').value;
+            config.goal = parseFloat(document.getElementById('goal').value) || 1000;
+            config.trackPeriod = parseInt(document.getElementById('trackPeriod').value) || 0;
+            config.refreshInterval = document.getElementById('refreshInterval').value;
+
+            localStorage.setItem('ibisConfig', JSON.stringify(config));
+            
+            showModal('Configuration Saved', 'Your settings have been saved successfully!', 'success');
+            updateDashboard();
+            
+            // Set up auto refresh if enabled
+            setupAutoRefresh();
+        }
+
+        function loadConfig() {
+            const saved = localStorage.getItem('ibisConfig');
+            if (saved) {
+                config = { ...config, ...JSON.parse(saved) };
+            }
+        }
+
+        async function startOAuthFlow() {
+            const clientID = document.getElementById('clientID').value.trim();
+            const clientSecret = document.getElementById('clientSecret').value.trim();
+
+            if (!clientID || !clientSecret) {
+                showModal('Missing Info', 'Enter Client ID and Secret first!', 'error');
+                return;
+            }
+
+            config.clientID = clientID;
+            config.clientSecret = clientSecret;
+
+            showLoading('Connecting to Strava', 'Opening Strava authorization...');
+
+            const params = new URLSearchParams({
+                client_id: clientID,
+                redirect_uri: OAUTH_REDIRECT_URI,
+                response_type: 'code',
+                scope: 'read,activity:read_all',
+                approval_prompt: 'auto'
+            });
+
+            const authUrl = `${STRAVA_AUTH_URL}?${params.toString()}`;
+
+            const width = 600;
+            const height = 700;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            const popup = window.open(authUrl, 'Strava Authorization', 
+                `width=${width},height=${height},left=${left},top=${top}`);
+
+            window.addEventListener('message', async (event) => {
+                if (event.data.type === 'strava-oauth-code') {
+                    popup?.close();
+                    await exchangeToken(event.data.code);
+                }
+            });
+
+            const checkPopup = setInterval(() => {
+                if (popup?.closed) {
+                    clearInterval(checkPopup);
+                    hideLoading();
+                }
+            }, 1000);
+        }
+
+        async function exchangeToken(code) {
+            updateLoadingMessage('Getting access token...');
+
+            try {
+                const response = await fetch(STRAVA_TOKEN_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        client_id: config.clientID,
+                        client_secret: config.clientSecret,
+                        code: code,
+                        grant_type: 'authorization_code'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.refresh_token) {
+                    config.refreshToken = data.refresh_token;
+                    config.accessToken = data.access_token;
+                    config.tokenExpiry = Date.now() + (data.expires_in * 1000);
+                    
+                    localStorage.setItem('ibisConfig', JSON.stringify(config));
+                    
+                    hideLoading();
+                    document.getElementById('stravaStatus').innerHTML = 
+                        '<div class="status-badge success">✓ Strava Connected</div>';
+                    
+                    showModal('Success!', 'Strava authorization complete! Switch to Dashboard to see your stats.', 'success');
+                    
+                    // Auto-refresh stats
+                    await refreshStats();
+                } else {
+                    throw new Error('No refresh token in response');
+                }
+            } catch (error) {
+                hideLoading();
+                showModal('Error', `Failed to connect to Strava: ${error.message}`, 'error');
+            }
+        }
+
+        async function getAccessToken() {
+            // Check if we need to refresh the token
+            if (Date.now() >= config.tokenExpiry - 300000) { // Refresh 5 min before expiry
+                return await refreshAccessToken();
+            }
+            return config.accessToken;
+        }
+
+        async function refreshAccessToken() {
+            try {
+                const response = await fetch(STRAVA_TOKEN_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        client_id: config.clientID,
+                        client_secret: config.clientSecret,
+                        refresh_token: config.refreshToken,
+                        grant_type: 'refresh_token'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.access_token) {
+                    config.accessToken = data.access_token;
+                    config.refreshToken = data.refresh_token;
+                    config.tokenExpiry = Date.now() + (data.expires_in * 1000);
+                    localStorage.setItem('ibisConfig', JSON.stringify(config));
+                    return config.accessToken;
+                }
+            } catch (error) {
+                console.error('Token refresh failed:', error);
+                throw error;
+            }
+        }
+
+        async function refreshStats() {
+            if (!config.refreshToken) {
+                return;
+            }
+
+            showLoading('Fetching Stats', 'Loading your Strava data...');
+
+            try {
+                const accessToken = await getAccessToken();
+
+                // Get athlete info
+                const athleteResponse = await fetch(STRAVA_ATHLETE_URL, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                const athlete = await athleteResponse.json();
+
+                // Get athlete stats
+                const statsResponse = await fetch(`${STRAVA_STATS_URL}/${athlete.id}/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                const stats = await statsResponse.json();
+
+                stravaData = {
+                    athlete: athlete,
+                    stats: stats,
+                    fetchedAt: Date.now()
+                };
+
+                // Save to localStorage for offline viewing
+                localStorage.setItem('ibisStravaData', JSON.stringify(stravaData));
+
+                hideLoading();
+                updateDashboard();
+                
+            } catch (error) {
+                hideLoading();
+                showModal('Error', `Failed to fetch stats: ${error.message}`, 'error');
+            }
+        }
+
+        function updateDashboard() {
+            const periods = ['Yearly', 'Monthly', 'Weekly'];
+            const periodName = periods[config.trackPeriod] || 'Yearly';
+            
+            document.getElementById('dashboardName').textContent = 
+                config.name || 'Strava Stats';
+            document.getElementById('dashboardPeriod').textContent = 
+                `${periodName} ${config.sport} Progress`;
+
+            // Try to load cached data
+            const cached = localStorage.getItem('ibisStravaData');
+            if (cached) {
+                stravaData = JSON.parse(cached);
+            }
+
+            if (!stravaData || !config.refreshToken) {
+                document.getElementById('dashboardContent').innerHTML = `
+                    <div class="error-message">
+                        <h3>🔧 Configuration Needed</h3>
+                        <p>Please configure your Strava credentials in the Configure tab to see your stats.</p>
+                    </div>
+                `;
+                document.getElementById('refreshBtn').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('refreshBtn').style.display = 'block';
+            renderStats();
+        }
+
+        function renderStats() {
+            if (!stravaData) return;
+
+            const { athlete, stats } = stravaData;
+            const periodKeys = {
+                0: 'ytd', // Yearly
+                1: 'recent', // Monthly (approximation using last 4 weeks)
+                2: 'recent' // Weekly (using recent)
+            };
+
+            const periodKey = periodKeys[config.trackPeriod] || 'ytd';
+            const sportKey = config.sport.toLowerCase();
+            
+            // Get the right stats based on sport and period
+            let periodStats;
+            if (sportKey === 'run') {
+                periodStats = stats[`${periodKey}_run_totals`] || stats.recent_run_totals;
+            } else if (sportKey === 'ride') {
+                periodStats = stats[`${periodKey}_ride_totals`] || stats.recent_ride_totals;
+            } else if (sportKey === 'swim') {
+                periodStats = stats[`${periodKey}_swim_totals`] || stats.recent_swim_totals;
+            } else {
+                // For hike/walk, use run stats as approximation
+                periodStats = stats[`${periodKey}_run_totals`] || stats.recent_run_totals;
+            }
+
+            const distance = (periodStats?.distance || 0) / 1000; // Convert to km
+            const movingTime = periodStats?.moving_time || 0;
+            const elevationGain = periodStats?.elevation_gain || 0;
+            const count = periodStats?.count || 0;
+
+            const hours = Math.floor(movingTime / 3600);
+            const minutes = Math.floor((movingTime % 3600) / 60);
+
+            const progress = Math.min((distance / config.goal) * 100, 100);
+
+            document.getElementById('dashboardContent').innerHTML = `
+                <div class="progress-card">
+                    <div class="progress-header">
+                        <div class="progress-title">${config.sport} Goal Progress</div>
+                        <div class="progress-percentage">${progress.toFixed(1)}%</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="progress-details">
+                        <span>${distance.toFixed(1)} km / ${config.goal} km</span>
+                        <span>${(config.goal - distance).toFixed(1)} km remaining</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📏</div>
+                        <div class="stat-label">Distance</div>
+                        <div class="stat-value">${distance.toFixed(1)}</div>
+                        <div class="stat-unit">kilometers</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-label">Moving Time</div>
+                        <div class="stat-value">${hours}h ${minutes}m</div>
+                        <div class="stat-unit">total time</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⛰️</div>
+                        <div class="stat-label">Elevation Gain</div>
+                        <div class="stat-value">${Math.round(elevationGain)}</div>
+                        <div class="stat-unit">meters climbed</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🏃</div>
+                        <div class="stat-label">Activities</div>
+                        <div class="stat-value">${count}</div>
+                        <div class="stat-unit">${config.sport.toLowerCase()}s completed</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-label">Avg Distance</div>
+                        <div class="stat-value">${count > 0 ? (distance / count).toFixed(1) : '0.0'}</div>
+                        <div class="stat-unit">km per activity</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">👤</div>
+                        <div class="stat-label">Athlete</div>
+                        <div class="stat-value" style="font-size: 1.5rem;">${athlete.firstname || 'Athlete'}</div>
+                        <div class="stat-unit">${athlete.city || ''}</div>
+                    </div>
+                </div>
+            `;
+
+            const lastUpdate = new Date(stravaData.fetchedAt).toLocaleString();
+            document.getElementById('lastUpdated').textContent = `Last updated: ${lastUpdate}`;
+        }
+
+        function setupAutoRefresh() {
+            if (refreshIntervalId) {
+                clearInterval(refreshIntervalId);
+            }
+
+            if (config.refreshInterval !== 'never' && config.refreshToken) {
+                const interval = parseInt(config.refreshInterval);
+                refreshIntervalId = setInterval(() => {
+                    refreshStats();
+                }, interval);
+            }
+        }
+
+        // Loading overlay
+        function showLoading(title, message) {
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.querySelector('.loading-title').textContent = title;
+            document.getElementById('loadingMessage').textContent = message;
+            animateFeathers();
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        function updateLoadingMessage(message) {
+            document.getElementById('loadingMessage').textContent = message;
+        }
+
+        let featherInterval;
+        function animateFeathers() {
+            let count = 1;
+            featherInterval = setInterval(() => {
+                const featherAnim = document.getElementById('featherAnim');
+                if (featherAnim) {
+                    featherAnim.textContent = '🪶'.repeat(count);
+                    count = count >= 10 ? 1 : count + 1;
+                }
+            }, 200);
+        }
+
+        // Modal
+        function showModal(title, body, type = 'info') {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.textContent = title;
+            modalBody.textContent = body;
+            
+            if (type === 'success') {
+                modalTitle.style.color = 'var(--success)';
+            } else if (type === 'error') {
+                modalTitle.style.color = 'var(--danger)';
+            } else {
+                modalTitle.style.color = 'var(--accent-primary)';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function hideModal() {
+            document.getElementById('modal').classList.remove('active');
+            clearInterval(featherInterval);
+        }
+
+        // OAuth callback handler
+        if (window.location.pathname === '/callback') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            if (code && window.opener) {
+                window.opener.postMessage({ type: 'strava-oauth-code', code }, '*');
+                document.body.innerHTML = `
+                    <div style="font-family: 'IBM Plex Mono', monospace; background: #0a0a12; color: #4ecdc4; 
+                        text-align: center; padding: 60px 20px; min-height: 100vh; display: flex; 
+                        flex-direction: column; justify-content: center; align-items: center;">
+                        <h1 style="font-size: 3rem; margin-bottom: 20px;">SUCCESS! ✨</h1>
+                        <p style="font-size: 1.2rem; color: #b0c4de;">You can close this window now</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
