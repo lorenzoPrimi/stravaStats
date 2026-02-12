@@ -42,6 +42,7 @@ The entire application is two files:
 - `POST /oauth/token` — Token exchange and refresh
 - `GET /api/v3/athlete` — Athlete profile
 - `GET /api/v3/athletes/:id/stats` — Athlete statistics
+- `GET /api/v3/athlete/activities` — Recent activities (latest run card with route map)
 
 ## Conventions
 

@@ -186,6 +186,44 @@
             border-style: dashed;
         }
 
+        .latest-run-date {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.1rem;
+            color: var(--accent-secondary);
+            margin-bottom: 4px;
+        }
+
+        .latest-run-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .latest-run-stats span {
+            text-align: center;
+        }
+
+        .latest-run-stats strong {
+            color: var(--text-primary);
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .latest-run-map {
+            width: 100%;
+            height: 80px;
+            margin-bottom: 8px;
+        }
+
+        .latest-run-map polyline {
+            fill: none;
+            stroke: var(--accent-secondary);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         .stat-icon {
             font-size: 2.5rem;
             margin-bottom: clamp(4px, 1dvh, 16px);
@@ -920,6 +958,7 @@
         const STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token";
         const STRAVA_ATHLETE_URL = "https://www.strava.com/api/v3/athlete";
         const STRAVA_STATS_URL = "https://www.strava.com/api/v3/athletes";
+        const STRAVA_ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities";
 
         let config = {
             clientID: '',
@@ -1167,9 +1206,23 @@
 
                 const stats = await statsResponse.json();
 
+                // Get latest activity
+                let latestActivity = null;
+                try {
+                    const activitiesResponse = await fetch(`${STRAVA_ACTIVITIES_URL}?per_page=5`, {
+                        headers: { 'Authorization': `Bearer ${accessToken}` }
+                    });
+                    const activities = await activitiesResponse.json();
+                    const sportType = config.sport;
+                    latestActivity = activities.find(a => a.type === sportType) || activities[0] || null;
+                } catch (e) {
+                    console.error('Failed to fetch activities:', e);
+                }
+
                 stravaData = {
                     athlete: athlete,
                     stats: stats,
+                    latestActivity: latestActivity,
                     fetchedAt: Date.now()
                 };
 
@@ -1206,6 +1259,56 @@
 
             document.getElementById('refreshBtn').style.display = 'block';
             renderStats();
+        }
+
+        function decodePolyline(encoded) {
+            const points = [];
+            let index = 0, lat = 0, lng = 0;
+            while (index < encoded.length) {
+                let shift = 0, result = 0, byte;
+                do {
+                    byte = encoded.charCodeAt(index++) - 63;
+                    result |= (byte & 0x1f) << shift;
+                    shift += 5;
+                } while (byte >= 0x20);
+                lat += (result & 1) ? ~(result >> 1) : (result >> 1);
+
+                shift = 0; result = 0;
+                do {
+                    byte = encoded.charCodeAt(index++) - 63;
+                    result |= (byte & 0x1f) << shift;
+                    shift += 5;
+                } while (byte >= 0x20);
+                lng += (result & 1) ? ~(result >> 1) : (result >> 1);
+
+                points.push([lat / 1e5, lng / 1e5]);
+            }
+            return points;
+        }
+
+        function renderRouteSVG(polyline) {
+            if (!polyline) return '';
+            const points = decodePolyline(polyline);
+            if (points.length < 2) return '';
+
+            const lats = points.map(p => p[0]);
+            const lngs = points.map(p => p[1]);
+            const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+            const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+            const latRange = maxLat - minLat || 0.001;
+            const lngRange = maxLng - minLng || 0.001;
+
+            const svgW = 200, svgH = 80, pad = 8;
+            const w = svgW - pad * 2, h = svgH - pad * 2;
+            const scale = Math.min(w / lngRange, h / latRange);
+            const offsetX = pad + (w - lngRange * scale) / 2;
+            const offsetY = pad + (h - latRange * scale) / 2;
+
+            const svgPoints = points.map(p =>
+                `${offsetX + (p[1] - minLng) * scale},${offsetY + (maxLat - p[0]) * scale}`
+            ).join(' ');
+
+            return `<svg class="latest-run-map" viewBox="0 0 ${svgW} ${svgH}" preserveAspectRatio="xMidYMid meet"><polyline points="${svgPoints}"/></svg>`;
         }
 
         function renderStats() {
@@ -1301,8 +1404,32 @@
                         <div class="stat-unit">km per activity</div>
                     </div>
 
-                    <div class="stat-card empty-card">
-                    </div>
+                    ${stravaData.latestActivity ? (() => {
+                        const act = stravaData.latestActivity;
+                        const actDate = new Date(act.start_date_local).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+                        const actDist = (act.distance / 1000).toFixed(2);
+                        const actTime = act.moving_time;
+                        const actH = Math.floor(actTime / 3600);
+                        const actM = Math.floor((actTime % 3600) / 60);
+                        const actS = actTime % 60;
+                        const actTimeStr = actH > 0 ? `${actH}h ${actM}m` : `${actM}m ${actS}s`;
+                        const paceTotal = act.distance > 0 ? (actTime / 60) / (act.distance / 1000) : 0;
+                        const paceMin = Math.floor(paceTotal);
+                        const paceSec = Math.round((paceTotal - paceMin) * 60);
+                        const paceStr = `${paceMin}:${String(paceSec).padStart(2, '0')}`;
+                        const routeSVG = renderRouteSVG(act.map?.summary_polyline);
+                        return `<div class="stat-card">
+                            <div class="stat-icon">🗺️</div>
+                            <div class="stat-label">Latest ${config.sport}</div>
+                            ${routeSVG}
+                            <div class="latest-run-date">${actDate}</div>
+                            <div class="latest-run-stats">
+                                <span><strong>${actDist} km</strong>distance</span>
+                                <span><strong>${paceStr} /km</strong>pace</span>
+                                <span><strong>${actTimeStr}</strong>time</span>
+                            </div>
+                        </div>`;
+                    })() : `<div class="stat-card empty-card"></div>`}
                 </div>
             `;
 
