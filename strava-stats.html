@@ -1206,15 +1206,18 @@
 
                 const stats = await statsResponse.json();
 
-                // Get latest activity
+                // Get YTD activities (all types)
                 let latestActivity = null;
+                let otherSportActivities = [];
                 try {
-                    const activitiesResponse = await fetch(`${STRAVA_ACTIVITIES_URL}?per_page=5`, {
+                    const yearStart = Math.floor(new Date(new Date().getFullYear(), 0, 1).getTime() / 1000);
+                    const activitiesResponse = await fetch(`${STRAVA_ACTIVITIES_URL}?per_page=200&after=${yearStart}`, {
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     });
                     const activities = await activitiesResponse.json();
                     const sportType = config.sport;
                     latestActivity = activities.find(a => a.type === sportType) || activities[0] || null;
+                    otherSportActivities = activities.filter(a => a.type !== sportType);
                 } catch (e) {
                     console.error('Failed to fetch activities:', e);
                 }
@@ -1223,6 +1226,7 @@
                     athlete: athlete,
                     stats: stats,
                     latestActivity: latestActivity,
+                    otherSportActivities: otherSportActivities,
                     fetchedAt: Date.now()
                 };
 
@@ -1353,6 +1357,13 @@
 
             const progress = Math.min((distance / config.goal) * 100, 100);
 
+            // Non-configured-sport YTD totals (all activity types)
+            const otherActivities = stravaData.otherSportActivities || [];
+            const otherCount = otherActivities.length;
+            const otherTime = otherActivities.reduce((sum, a) => sum + (a.moving_time || 0), 0);
+            const otherH = Math.floor(otherTime / 3600);
+            const otherM = Math.floor((otherTime % 3600) / 60);
+
             document.getElementById('dashboardContent').innerHTML = `
                 <div class="progress-card">
                     <div class="progress-header">
@@ -1370,10 +1381,10 @@
 
                 <div class="dashboard-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">📏</div>
-                        <div class="stat-label">Distance</div>
-                        <div class="stat-value">${distance.toFixed(1)}</div>
-                        <div class="stat-unit">kilometers</div>
+                        <div class="stat-icon">🏃</div>
+                        <div class="stat-label">Activities</div>
+                        <div class="stat-value">${count}</div>
+                        <div class="stat-unit">${config.sport.toLowerCase()}s completed</div>
                     </div>
 
                     <div class="stat-card">
@@ -1391,17 +1402,17 @@
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon">🏃</div>
-                        <div class="stat-label">Activities</div>
-                        <div class="stat-value">${count}</div>
-                        <div class="stat-unit">${config.sport.toLowerCase()}s completed</div>
-                    </div>
-
-                    <div class="stat-card">
                         <div class="stat-icon">⚡</div>
                         <div class="stat-label">Avg Distance</div>
                         <div class="stat-value">${count > 0 ? (distance / count).toFixed(1) : '0.0'}</div>
                         <div class="stat-unit">km per activity</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💪</div>
+                        <div class="stat-label">Other Workouts</div>
+                        <div class="stat-value">${otherH > 0 ? `${otherH}h ${otherM}m` : `${otherM}m`}</div>
+                        <div class="stat-unit">${otherCount} activities this year</div>
                     </div>
 
                     ${stravaData.latestActivity ? (() => {
