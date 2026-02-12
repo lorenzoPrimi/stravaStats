@@ -81,6 +81,17 @@
             background-clip: text;
         }
 
+        .nav-athlete {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .nav-athlete .athlete-name {
+            color: var(--accent-secondary);
+            font-weight: 600;
+        }
+
         .nav-tabs {
             display: flex;
             gap: 8px;
@@ -168,6 +179,11 @@
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        .stat-card.empty-card {
+            opacity: 0.3;
+            border-style: dashed;
         }
 
         .stat-icon {
@@ -642,6 +658,10 @@
 
         /* Mobile responsiveness */
         @media (max-width: 480px) {
+            .nav-athlete {
+                display: none;
+            }
+
             body {
                 overflow: auto;
                 overflow-x: hidden;
@@ -754,6 +774,7 @@
     <nav class="nav">
         <div class="nav-content">
             <div class="nav-logo">Strava Stats</div>
+            <div class="nav-athlete" id="navAthlete"></div>
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchView('dashboard')">Dashboard</button>
                 <button class="nav-tab" onclick="switchView('config')">Configure</button>
@@ -1179,6 +1200,7 @@
                     </div>
                 `;
                 document.getElementById('refreshBtn').style.display = 'none';
+                document.getElementById('navAthlete').innerHTML = '';
                 return;
             }
 
@@ -1190,6 +1212,12 @@
             if (!stravaData) return;
 
             const { athlete, stats } = stravaData;
+
+            const navAthlete = document.getElementById('navAthlete');
+            if (navAthlete && athlete) {
+                navAthlete.innerHTML = `<span class="athlete-name">${athlete.firstname || ''}</span> ${athlete.city ? '· ' + athlete.city : ''}`;
+            }
+
             const periodKeys = {
                 0: 'ytd', // Yearly
                 1: 'recent', // Monthly (approximation using last 4 weeks)
@@ -1273,11 +1301,7 @@
                         <div class="stat-unit">km per activity</div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-icon">👤</div>
-                        <div class="stat-label">Athlete</div>
-                        <div class="stat-value" style="font-size: 1.5rem;">${athlete.firstname || 'Athlete'}</div>
-                        <div class="stat-unit">${athlete.city || ''}</div>
+                    <div class="stat-card empty-card">
                     </div>
                 </div>
             `;
