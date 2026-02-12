@@ -1222,6 +1222,7 @@
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     });
                     const activities = await activitiesResponse.json();
+                    activities.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
                     const sportType = config.sport;
                     latestActivity = activities.find(a => a.type === sportType) || activities[0] || null;
                     otherSportActivities = activities.filter(a => a.type !== sportType);
