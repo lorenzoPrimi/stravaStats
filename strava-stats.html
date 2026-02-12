@@ -725,6 +725,28 @@
                 height: 22px;
             }
         }
+
+        /* Phone landscape — short viewport, wide enough for desktop layout */
+        @media (max-height: 500px) and (min-width: 481px) {
+            body {
+                overflow: auto;
+                overflow-x: hidden;
+            }
+
+            .container {
+                height: auto;
+                min-height: calc(100dvh - 68px);
+            }
+
+            .dashboard-grid {
+                flex: none;
+            }
+
+            .last-updated {
+                flex-shrink: 1;
+                padding: 8px 0;
+            }
+        }
     </style>
 </head>
 <body>
