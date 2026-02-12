@@ -190,37 +190,39 @@
             border-style: dashed;
         }
 
+        .latest-run-card {
+            position: relative;
+        }
+
         .latest-run-date {
             font-family: 'DM Serif Display', serif;
             font-size: 1.1rem;
             color: var(--accent-secondary);
             margin-bottom: 4px;
-            text-align: center;
         }
 
-        .latest-run-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
+        .latest-run-detail {
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            width: 100%;
+            line-height: 1.6;
         }
 
-        .latest-run-stats span {
-            text-align: center;
-        }
-
-        .latest-run-stats strong {
+        .latest-run-detail strong {
             color: var(--text-primary);
-            display: block;
-            font-size: 0.95rem;
+        }
+
+        .latest-run-route {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 45%;
+            height: 50%;
+            opacity: 0.6;
         }
 
         .latest-run-map {
             width: 100%;
-            height: 80px;
-            margin-bottom: 8px;
-            align-self: stretch;
+            height: 100%;
         }
 
         .latest-run-map polyline {
@@ -1437,16 +1439,14 @@
                         const paceSec = Math.round((paceTotal - paceMin) * 60);
                         const paceStr = `${paceMin}:${String(paceSec).padStart(2, '0')}`;
                         const routeSVG = renderRouteSVG(act.map?.summary_polyline);
-                        return `<div class="stat-card">
+                        return `<div class="stat-card latest-run-card">
+                            <div class="latest-run-route">${routeSVG}</div>
                             <div class="stat-icon">🗺️</div>
                             <div class="stat-label">Latest ${config.sport}</div>
-                            ${routeSVG}
                             <div class="latest-run-date">${actDate}</div>
-                            <div class="latest-run-stats">
-                                <span><strong>${actDist} km</strong>distance</span>
-                                <span><strong>${paceStr} /km</strong>pace</span>
-                                <span><strong>${actTimeStr}</strong>time</span>
-                            </div>
+                            <div class="latest-run-detail"><strong>${actDist}</strong> km</div>
+                            <div class="latest-run-detail"><strong>${paceStr}</strong> /km</div>
+                            <div class="latest-run-detail"><strong>${actTimeStr}</strong></div>
                         </div>`;
                     })() : `<div class="stat-card empty-card"></div>`}
                 </div>
